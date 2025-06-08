@@ -11,7 +11,9 @@ export default function Editor() {
   // state for new breakpoint selection
   const [newBreakpoint, setNewBreakpoint] = useState("");
   const [elements, setElements] = useState([]);
+  const [newElementName, setNewElementName] = useState(""); // state for new element name
 
+  console.log("elements", elements);
   // compute available breakpoints not already added
   const availableOptions = ["sm", "md", "lg", "xl", "2xl"].filter(
     (bp) => !(bp in gridSizes)
@@ -126,13 +128,78 @@ export default function Editor() {
           <div className="mt-4">
             <p className="font-bold">Elements List:</p>
             <ul>
-              {elements.map((el) => (
-                <li key={el.id} className="mb-2 bg-amber-200 p-2 rounded">
-                  {el.name} - r: {el.startRow}, c: {el.startCol}, rs:{" "}
-                  {el.rowSpan}, cs: {el.colSpan}
+              {elements.map((el, idx) => (
+                <li
+                  key={el.name + idx}
+                  className="mb-2 bg-amber-200 p-2 rounded flex items-center justify-between"
+                >
+                  <span>
+                    {el.name} - placements:{" "}
+                    {Object.keys(el.placement).join(", ")}
+                  </span>
+                  <button
+                    aria-label="Remove"
+                    className="ml-2 text-red-600 hover:text-red-800"
+                    onClick={() =>
+                      setElements(elements.filter((_, i) => i !== idx))
+                    }
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
                 </li>
               ))}
             </ul>
+            {/* Input and button to add new element */}
+            <div className="flex gap-2 mt-2">
+              <Input
+                placeholder="Element name"
+                value={newElementName}
+                onChange={(e) => setNewElementName(e.target.value)}
+                className="flex-1"
+              />
+              <Button
+                onClick={() => {
+                  if (!newElementName.trim()) return;
+                  setElements([
+                    ...elements,
+                    {
+                      name: newElementName,
+                      placement: {
+                        none: {
+                          colStart: 1,
+                          colEnd: 2,
+                          rowStart: 1,
+                          rowEnd: 2,
+                        },
+                      },
+                    },
+                  ]);
+                  setNewElementName("");
+                }}
+                disabled={!newElementName.trim()}
+              >
+                Add
+              </Button>
+            </div>
           </div>
         </div>
         <GridView
@@ -140,6 +207,7 @@ export default function Editor() {
           setElements={setElements}
           columns={gridSizes[breakpoint].columns}
           rows={gridSizes[breakpoint].rows}
+          breakpoint={breakpoint}
         />
       </Hero.Content>
     </Hero>

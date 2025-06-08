@@ -1,7 +1,13 @@
 import React, { useState, useRef } from "react";
 import { Button, Card, Form, Hero, Input, Link } from "react-daisyui";
 
-export default function GridView({ columns, rows, elements, setElements }) {
+export default function GridView({
+  columns,
+  rows,
+  elements,
+  setElements,
+  breakpoint = "none",
+}) {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [selection, setSelection] = useState(null); // { startRow, startCol, endRow, endCol }
@@ -45,12 +51,15 @@ export default function GridView({ columns, rows, elements, setElements }) {
       setElements((prev) => [
         ...prev,
         {
-          id: Date.now(),
           name,
-          startRow,
-          startCol,
-          rowSpan: endRow - startRow + 1,
-          colSpan: endCol - startCol + 1,
+          placement: {
+            [breakpoint]: {
+              colStart: startCol,
+              colEnd: endCol + 1,
+              rowStart: startRow,
+              rowEnd: endRow + 1,
+            },
+          },
         },
       ]);
     }
@@ -85,44 +94,46 @@ export default function GridView({ columns, rows, elements, setElements }) {
               ))}
             </React.Fragment>
           ))}
-          {elements.map((el) => (
-            <Button
-              key={el.id}
-              className="bg-blue-500 text-white z-10 absolute"
-              onMouseDown={(e) => e.stopPropagation()} // added to prevent dragging on blue element
-              onClick={(e) => {
-                e.stopPropagation();
-                const newName = prompt("Enter new name:", el.name);
-                if (newName) {
-                  setElements((prev) =>
-                    prev.map((item) =>
-                      item.id === el.id ? { ...item, name: newName } : item
-                    )
-                  );
-                }
-              }}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (confirm("Remove this cell?")) {
-                  setElements((prev) =>
-                    prev.filter((item) => item.id !== el.id)
-                  );
-                }
-                return false;
-              }}
-              style={{
-                gridColumnStart: el.startCol,
-                gridColumnEnd: el.startCol + el.colSpan,
-                gridRowStart: el.startRow,
-                gridRowEnd: el.startRow + el.rowSpan,
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              {el.name}
-            </Button>
-          ))}
+          {elements.map((el, idx) => {
+            const place = el.placement && el.placement[breakpoint];
+            if (!place) return null;
+            return (
+              <Button
+                key={el.name + idx}
+                className="bg-blue-500 text-white z-10 absolute"
+                onMouseDown={(e) => e.stopPropagation()} // prevent dragging on blue element
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newName = prompt("Enter new name:", el.name);
+                  if (newName) {
+                    setElements((prev) =>
+                      prev.map((item, i) =>
+                        i === idx ? { ...item, name: newName } : item
+                      )
+                    );
+                  }
+                }}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (confirm("Remove this cell?")) {
+                    setElements((prev) => prev.filter((_, i) => i !== idx));
+                  }
+                  return false;
+                }}
+                style={{
+                  gridColumnStart: place.colStart,
+                  gridColumnEnd: place.colEnd,
+                  gridRowStart: place.rowStart,
+                  gridRowEnd: place.rowEnd,
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+                {el.name}
+              </Button>
+            );
+          })}
           {/* Optional: during dragging, show a border highlight */}
           {dragging && selection && (
             <div
