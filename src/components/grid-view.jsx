@@ -7,6 +7,7 @@ export default function GridView({
   elements,
   setElements,
   breakpoint = "none",
+  activeElement,
 }) {
   const containerRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -42,26 +43,30 @@ export default function GridView({
 
   const handleMouseUp = () => {
     if (!dragging || !selection) return;
-    const name = prompt("Enter name for new cell:");
-    if (name) {
+    if (activeElement) {
+      // Assign placement for the active element at the current breakpoint
       const startRow = Math.min(selection.startRow, selection.endRow);
       const endRow = Math.max(selection.startRow, selection.endRow);
       const startCol = Math.min(selection.startCol, selection.endCol);
       const endCol = Math.max(selection.startCol, selection.endCol);
-      setElements((prev) => [
-        ...prev,
-        {
-          name,
-          placement: {
-            [breakpoint]: {
-              colStart: startCol,
-              colEnd: endCol + 1,
-              rowStart: startRow,
-              rowEnd: endRow + 1,
-            },
-          },
-        },
-      ]);
+      setElements((prev) =>
+        prev.map((el) =>
+          el.name === activeElement.name
+            ? {
+                ...el,
+                placement: {
+                  ...el.placement,
+                  [breakpoint]: {
+                    colStart: startCol,
+                    colEnd: endCol + 1,
+                    rowStart: startRow,
+                    rowEnd: endRow + 1,
+                  },
+                },
+              }
+            : el
+        )
+      );
     }
     setDragging(false);
     setSelection(null);
@@ -100,18 +105,15 @@ export default function GridView({
             return (
               <Button
                 key={el.name + idx}
-                className="bg-blue-500 text-white z-10 absolute"
+                className={`bg-blue-500 text-white z-10 absolute${
+                  activeElement && activeElement.name === el.name
+                    ? " ring-4 ring-yellow-400"
+                    : ""
+                }`}
                 onMouseDown={(e) => e.stopPropagation()} // prevent dragging on blue element
                 onClick={(e) => {
                   e.stopPropagation();
-                  const newName = prompt("Enter new name:", el.name);
-                  if (newName) {
-                    setElements((prev) =>
-                      prev.map((item, i) =>
-                        i === idx ? { ...item, name: newName } : item
-                      )
-                    );
-                  }
+                  // No setActiveElement here; selection is handled in editor
                 }}
                 onContextMenu={(e) => {
                   e.preventDefault();

@@ -12,6 +12,7 @@ export default function Editor() {
   const [newBreakpoint, setNewBreakpoint] = useState("");
   const [elements, setElements] = useState([]);
   const [newElementName, setNewElementName] = useState(""); // state for new element name
+  const [activeElement, setActiveElement] = useState(null);
 
   console.log("elements", elements);
   // compute available breakpoints not already added
@@ -131,40 +132,65 @@ export default function Editor() {
               {elements.map((el, idx) => (
                 <li
                   key={el.name + idx}
-                  className="mb-2 bg-amber-200 p-2 rounded flex items-center justify-between"
+                  className={`mb-2 bg-amber-200 p-2 rounded flex items-center justify-between${
+                    activeElement && activeElement.name === el.name
+                      ? " ring-2 ring-yellow-500"
+                      : ""
+                  }`}
                 >
                   <span>
                     {el.name} - placements:{" "}
                     {Object.keys(el.placement).join(", ")}
                   </span>
-                  <button
-                    aria-label="Remove"
-                    className="ml-2 text-red-600 hover:text-red-800"
-                    onClick={() =>
-                      setElements(elements.filter((_, i) => i !== idx))
-                    }
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="xs"
+                      color={
+                        activeElement && activeElement.name === el.name
+                          ? "warning"
+                          : "info"
+                      }
+                      onClick={() =>
+                        setActiveElement(
+                          activeElement && activeElement.name === el.name
+                            ? null
+                            : el
+                        )
+                      }
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
+                      {activeElement && activeElement.name === el.name
+                        ? "Unset Active"
+                        : "Set Active"}
+                    </Button>
+                    <button
+                      aria-label="Remove"
+                      className="text-red-600 hover:text-red-800"
+                      onClick={() =>
+                        setElements(elements.filter((_, i) => i !== idx))
+                      }
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -208,6 +234,7 @@ export default function Editor() {
           columns={gridSizes[breakpoint].columns}
           rows={gridSizes[breakpoint].rows}
           breakpoint={breakpoint}
+          activeElement={activeElement}
         />
       </Hero.Content>
     </Hero>
