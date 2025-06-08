@@ -123,8 +123,18 @@ export default function Editor() {
               ))}
             </Select>
           </div>
+          <div className="mt-4">
+            <p className="font-bold">Elements List:</p>
+            <ul>
+              {elements.map((el) => (
+                <li key={el.id} className="mb-2 bg-amber-200 p-2 rounded">
+                  {el.name} - r: {el.startRow}, c: {el.startCol}, rs:{" "}
+                  {el.rowSpan}, cs: {el.colSpan}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        {/* ...existing code... */}
         <GridView
           elements={elements}
           setElements={setElements}
