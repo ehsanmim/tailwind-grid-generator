@@ -132,36 +132,13 @@ export default function Editor() {
               {elements.map((el, idx) => (
                 <li
                   key={el.name + idx}
-                  className={`mb-2 bg-amber-200 p-2 rounded flex items-center justify-between${
-                    activeElement && activeElement.name === el.name
-                      ? " ring-2 ring-yellow-500"
-                      : ""
-                  }`}
+                  className={`mb-2 bg-amber-200 p-2 rounded flex flex-col`}
                 >
-                  <span>
-                    {el.name} - placements:{" "}
-                    {Object.keys(el.placement).join(", ")}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="xs"
-                      color={
-                        activeElement && activeElement.name === el.name
-                          ? "warning"
-                          : "info"
-                      }
-                      onClick={() =>
-                        setActiveElement(
-                          activeElement && activeElement.name === el.name
-                            ? null
-                            : el
-                        )
-                      }
-                    >
-                      {activeElement && activeElement.name === el.name
-                        ? "Unset Active"
-                        : "Set Active"}
-                    </Button>
+                  <div className="flex items-center justify-between">
+                    <span>
+                      {el.name} - placements:{" "}
+                      {Object.keys(el.placement).join(", ")}
+                    </span>
                     <button
                       aria-label="Remove"
                       className="text-red-600 hover:text-red-800"
@@ -191,6 +168,45 @@ export default function Editor() {
                       </svg>
                     </button>
                   </div>
+                  <div className="flex gap-2 mt-2">
+                    {Object.keys(gridSizes).map((bp) => {
+                      let color = "error";
+                      if (el.placement[bp]) color = "success";
+                      if (
+                        activeElement &&
+                        activeElement.name === el.name &&
+                        breakpoint === bp
+                      )
+                        color = "warning";
+                      return (
+                        <Button
+                          key={bp}
+                          size="xs"
+                          color={color}
+                          className={
+                            color === "warning" ? "animate-pulse" : undefined
+                          }
+                          onClick={() => {
+                            if (
+                              activeElement &&
+                              activeElement.name === el.name &&
+                              breakpoint === bp
+                            ) {
+                              setActiveElement(null);
+                              // Only setBreakpoint("none") if the current activeElement is being toggled off
+                              // and the current breakpoint is not used by any other active element
+                              // Otherwise, leave the breakpoint as is
+                            } else {
+                              setActiveElement(el);
+                              setBreakpoint(bp);
+                            }
+                          }}
+                        >
+                          {bp}
+                        </Button>
+                      );
+                    })}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -209,14 +225,7 @@ export default function Editor() {
                     ...elements,
                     {
                       name: newElementName,
-                      placement: {
-                        none: {
-                          colStart: 1,
-                          colEnd: 2,
-                          rowStart: 1,
-                          rowEnd: 2,
-                        },
-                      },
+                      placement: {},
                     },
                   ]);
                   setNewElementName("");
