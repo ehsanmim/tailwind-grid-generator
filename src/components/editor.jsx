@@ -13,6 +13,8 @@ export default function Editor() {
   const [elements, setElements] = useState([]);
   const [newElementName, setNewElementName] = useState(""); // state for new element name
   const [activeElement, setActiveElement] = useState(null);
+  const [editingElementIdx, setEditingElementIdx] = useState(null);
+  const [editingElementName, setEditingElementName] = useState("");
 
   console.log("elements", elements);
   // compute available breakpoints not already added
@@ -145,7 +147,53 @@ export default function Editor() {
                   className={`mb-2 bg-amber-200 p-2 rounded flex flex-col`}
                 >
                   <div className="flex items-center justify-between">
-                    <span>{el.name}</span>
+                    {editingElementIdx === idx ? (
+                      <input
+                        className="input input-bordered input-sm flex-1 mr-2"
+                        value={editingElementName}
+                        autoFocus
+                        onChange={(e) => setEditingElementName(e.target.value)}
+                        onBlur={() => {
+                          if (editingElementName.trim()) {
+                            setElements(
+                              elements.map((item, i) =>
+                                i === idx
+                                  ? { ...item, name: editingElementName }
+                                  : item
+                              )
+                            );
+                          }
+                          setEditingElementIdx(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            if (editingElementName.trim()) {
+                              setElements(
+                                elements.map((item, i) =>
+                                  i === idx
+                                    ? { ...item, name: editingElementName }
+                                    : item
+                                )
+                              );
+                            }
+                            setEditingElementIdx(null);
+                          } else if (e.key === "Escape") {
+                            setEditingElementIdx(null);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <span
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          setEditingElementIdx(idx);
+                          setEditingElementName(el.name);
+                        }}
+                        title="Click to rename"
+                      >
+                        {el.name}
+                      </span>
+                    )}
                     <button
                       aria-label="Remove"
                       className="text-red-600 hover:text-red-800"
