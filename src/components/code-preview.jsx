@@ -17,21 +17,19 @@ export default function CodePreview({ elements, gridSizes }) {
     .join(" ");
 
   const elementClasses = elements.map(({ placement }) => {
-    return (
-      Object.keys(placement)
-        //sort them to be in the order of "none", "sm", "md", "lg", "xl"
-        .sort((a, b) => {
-          const order = ["none", "sm", "md", "lg", "xl"];
-          return order.indexOf(a) - order.indexOf(b);
-        })
-        .map((key) => {
-          if (key === "none") {
-            return `col-start-${placement[key].colStart} col-end-${placement[key].colEnd} row-start-${placement[key].rowStart} row-end-${placement[key].rowEnd}`;
-          }
-          return `${key}:col-start-${placement[key].colStart} ${key}:col-end-${placement[key].colEnd} ${key}:row-start-${placement[key].rowStart} ${key}:row-end-${placement[key].rowEnd}`;
-        })
-        .join(" ")
-    );
+    const breakpoints = Object.keys(gridSizes);
+    return breakpoints
+      .map((key) => {
+        if (!placement[key]) {
+          // If no placement for this key, add hidden for that breakpoint
+          return key === "none" ? "hidden" : `${key}:hidden`;
+        }
+        if (key === "none") {
+          return `col-start-${placement[key].colStart} col-end-${placement[key].colEnd} row-start-${placement[key].rowStart} row-end-${placement[key].rowEnd}`;
+        }
+        return `${key}:col-start-${placement[key].colStart} ${key}:col-end-${placement[key].colEnd} ${key}:row-start-${placement[key].rowStart} ${key}:row-end-${placement[key].rowEnd}`;
+      })
+      .join(" ");
   });
 
   // Generate the code string for copying
