@@ -48,9 +48,10 @@ export default function Editor() {
     <Hero>
       <Hero.Content className="flex-col lg:flex-row-reverse w-full items-start">
         <div className="text-center lg:text-left">
-          <p className="text-2xl font-bold">Choose a breakpoint!</p>
-          <div className="flex gap-2 justify-center mt-4">
-            {/* dynamic breakpoint options */}
+          <label className="label  mt-4">
+            <span className="label-text">Active Breakpoint</span>
+          </label>
+          <div className="flex gap-2 justify-center">
             <Select
               value={breakpoint}
               onChange={(event) => setBreakpoint(event.target.value)}
@@ -70,8 +71,55 @@ export default function Editor() {
               Remove Breakpoint
             </Button>
           </div>
-          {/* Select and button to add a new grid size */}
           <div className="flex gap-2 justify-center mt-4">
+            <label className="label">
+              <span className="label-text">Columns</span>
+            </label>
+            <Select
+              value={gridSizes[breakpoint].columns}
+              onChange={(event) =>
+                setGridSizes((prev) => ({
+                  ...prev,
+                  [breakpoint]: {
+                    ...prev[breakpoint],
+                    columns: Number(event.target.value),
+                  },
+                }))
+              }
+            >
+              {Array.from({ length: 50 }, (_, i) => (
+                <option key={`col-${i + 1}`} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </Select>
+            <label className="label">
+              <span className="label-text">Rows</span>
+            </label>
+            <Select
+              value={gridSizes[breakpoint].rows}
+              onChange={(event) =>
+                setGridSizes((prev) => ({
+                  ...prev,
+                  [breakpoint]: {
+                    ...prev[breakpoint],
+                    rows: Number(event.target.value),
+                  },
+                }))
+              }
+            >
+              {Array.from({ length: 50 }, (_, i) => (
+                <option key={`row-${i + 1}`} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <label className="label  mt-4">
+            <span className="label-text">Add new breakpoint</span>
+          </label>
+          <div className="flex gap-2 justify-center">
             <Select
               value={newBreakpoint}
               onChange={(e) => setNewBreakpoint(e.target.value)}
@@ -87,45 +135,7 @@ export default function Editor() {
               Add Breakpoint
             </Button>
           </div>
-          {/* Existing select elements for columns and rows */}
-          <div className="flex gap-2 justify-center mt-4">
-            <Select
-              value={gridSizes[breakpoint].columns}
-              onChange={(event) =>
-                setGridSizes((prev) => ({
-                  ...prev,
-                  [breakpoint]: {
-                    ...prev[breakpoint],
-                    columns: Number(event.target.value),
-                  },
-                }))
-              }
-            >
-              {Array.from({ length: 20 }, (_, i) => (
-                <option key={`col-${i + 1}`} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
-            </Select>
-            <Select
-              value={gridSizes[breakpoint].rows}
-              onChange={(event) =>
-                setGridSizes((prev) => ({
-                  ...prev,
-                  [breakpoint]: {
-                    ...prev[breakpoint],
-                    rows: Number(event.target.value),
-                  },
-                }))
-              }
-            >
-              {Array.from({ length: 20 }, (_, i) => (
-                <option key={`row-${i + 1}`} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
-            </Select>
-          </div>
+
           <div className="mt-4">
             <p className="font-bold">Elements List:</p>
             <ul>
@@ -135,10 +145,7 @@ export default function Editor() {
                   className={`mb-2 bg-amber-200 p-2 rounded flex flex-col`}
                 >
                   <div className="flex items-center justify-between">
-                    <span>
-                      {el.name} - placements:{" "}
-                      {Object.keys(el.placement).join(", ")}
-                    </span>
+                    <span>{el.name}</span>
                     <button
                       aria-label="Remove"
                       className="text-red-600 hover:text-red-800"
