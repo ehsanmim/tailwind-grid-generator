@@ -2,16 +2,18 @@ import { Button, Card, Form, Hero, Input, Link, Select } from "react-daisyui";
 import GridView from "./grid-view";
 import { useState } from "react";
 
-export default function Editor() {
+export default function Editor({
+  gridSizes,
+  setGridSizes,
+  elements,
+  setElements,
+}) {
   // updated initial grid sizes: only "none" exists
-  const [gridSizes, setGridSizes] = useState({
-    none: { columns: 1, rows: 1 },
-  });
+
   const [breakpoint, setBreakpoint] = useState("none");
   // state for new breakpoint selection
   const [newBreakpoint, setNewBreakpoint] = useState("");
-  const [elements, setElements] = useState([]);
-  const [newElementName, setNewElementName] = useState(""); // state for new element name
+  const [newElementName, setNewElementName] = useState("");
   const [activeElement, setActiveElement] = useState(null);
   const [editingElementIdx, setEditingElementIdx] = useState(null);
   const [editingElementName, setEditingElementName] = useState("");
@@ -48,7 +50,7 @@ export default function Editor() {
 
   return (
     <Hero>
-      <Hero.Content className="flex-col lg:flex-row-reverse w-full items-start">
+      <Hero.Content className="flex-col lg:flex-row-reverse w-full items-start max-w-full">
         <div className="text-center lg:text-left">
           <label className="label  mt-4">
             <span className="label-text">Active Breakpoint</span>
@@ -75,10 +77,11 @@ export default function Editor() {
           </div>
           <div className="flex gap-2 justify-center mt-4">
             <label className="label">
-              <span className="label-text">Columns</span>
+              <span className="label-text">Cols</span>
             </label>
             <Select
               value={gridSizes[breakpoint].columns}
+              size="sm"
               onChange={(event) =>
                 setGridSizes((prev) => ({
                   ...prev,
@@ -89,7 +92,7 @@ export default function Editor() {
                 }))
               }
             >
-              {Array.from({ length: 50 }, (_, i) => (
+              {Array.from({ length: 16 }, (_, i) => (
                 <option key={`col-${i + 1}`} value={i + 1}>
                   {i + 1}
                 </option>
@@ -100,6 +103,7 @@ export default function Editor() {
             </label>
             <Select
               value={gridSizes[breakpoint].rows}
+              size="sm"
               onChange={(event) =>
                 setGridSizes((prev) => ({
                   ...prev,
@@ -272,6 +276,18 @@ export default function Editor() {
                 value={newElementName}
                 onChange={(e) => setNewElementName(e.target.value)}
                 className="flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newElementName.trim()) {
+                    setElements([
+                      ...elements,
+                      {
+                        name: newElementName,
+                        placement: {},
+                      },
+                    ]);
+                    setNewElementName("");
+                  }
+                }}
               />
               <Button
                 onClick={() => {
