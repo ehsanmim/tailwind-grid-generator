@@ -118,8 +118,18 @@ export default function GridView({
                 onContextMenu={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  if (confirm("Remove this cell?")) {
-                    setElements((prev) => prev.filter((_, i) => i !== idx));
+                  if (
+                    confirm("Remove this cell's placement for this breakpoint?")
+                  ) {
+                    setElements((prev) =>
+                      prev.map((el2, i) => {
+                        if (i !== idx) return el2;
+                        // Remove only the placement for the current breakpoint
+                        const newPlacement = { ...el2.placement };
+                        delete newPlacement[breakpoint];
+                        return { ...el2, placement: newPlacement };
+                      })
+                    );
                   }
                   return false;
                 }}
