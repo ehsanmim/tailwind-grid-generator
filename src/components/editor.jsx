@@ -278,13 +278,18 @@ export default function Editor({
                 className="flex-1"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && newElementName.trim()) {
-                    setElements([
-                      ...elements,
-                      {
-                        name: newElementName,
-                        placement: {},
-                      },
-                    ]);
+                    if (
+                      elements.some((el) => el.name === newElementName.trim())
+                    ) {
+                      alert("Element with this name already exists.");
+                      return;
+                    }
+                    const newEl = {
+                      name: newElementName,
+                      placement: {},
+                    };
+                    setElements([...elements, newEl]);
+                    setActiveElement(newEl);
                     setNewElementName("");
                   }
                 }}
@@ -292,13 +297,18 @@ export default function Editor({
               <Button
                 onClick={() => {
                   if (!newElementName.trim()) return;
-                  setElements([
-                    ...elements,
-                    {
-                      name: newElementName,
-                      placement: {},
-                    },
-                  ]);
+                  if (
+                    elements.some((el) => el.name === newElementName.trim())
+                  ) {
+                    alert("Element with this name already exists.");
+                    return;
+                  }
+                  const newEl = {
+                    name: newElementName,
+                    placement: {},
+                  };
+                  setElements([...elements, newEl]);
+                  setActiveElement(newEl);
                   setNewElementName("");
                 }}
                 disabled={!newElementName.trim()}
